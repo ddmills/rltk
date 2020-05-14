@@ -1,4 +1,4 @@
-use rltk::{GameState, Rltk, RGB, Point};
+use rltk::{GameState, Point, Rltk, RGB};
 use specs::prelude::*;
 
 mod components;
@@ -25,7 +25,12 @@ mod damage_system;
 pub use damage_system::DamageSystem;
 
 #[derive(PartialEq, Copy, Clone)]
-pub enum RunState { AwaitingInput, PreRun, PlayerTurn, MonsterTurn }
+pub enum RunState {
+    AwaitingInput,
+    PreRun,
+    PlayerTurn,
+    MonsterTurn,
+}
 
 pub struct State {
     pub ecs: World,
@@ -54,7 +59,7 @@ impl State {
 }
 
 impl GameState for State {
-    fn tick(&mut self, ctx : &mut Rltk) {
+    fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
 
         let mut newrunstate;
@@ -96,7 +101,9 @@ impl GameState for State {
 
         for (pos, render) in (&positions, &renderables).join() {
             let idx = map.xy_idx(pos.x, pos.y);
-            if map.visible_tiles[idx] { ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph) }
+            if map.visible_tiles[idx] {
+                ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
+            }
         }
 
         gui::draw_ui(&self.ecs, ctx);
@@ -130,19 +137,23 @@ fn main() -> rltk::BError {
     let map = Map::new_map_rooms_and_corridors();
     let (player_x, player_y) = map.spawn();
 
-    let player_entity = gs.ecs
+    let player_entity = gs
+        .ecs
         .create_entity()
-        .with(Position { x: player_x, y: player_y })
+        .with(Position {
+            x: player_x,
+            y: player_y,
+        })
         .with(Renderable {
             glyph: rltk::to_cp437('@'),
             fg: RGB::named(rltk::YELLOW),
             bg: RGB::named(rltk::BLACK),
         })
-        .with(Player{})
-        .with(Name{
-            name: "Player".to_string()
+        .with(Player {})
+        .with(Name {
+            name: "Player".to_string(),
         })
-        .with(CombatStats{
+        .with(CombatStats {
             max_hp: 30,
             hp: 30,
             defense: 2,
@@ -151,7 +162,7 @@ fn main() -> rltk::BError {
         .with(Viewshed {
             visible_tiles: Vec::new(),
             range: 8,
-            dirty: true
+            dirty: true,
         })
         .build();
 
@@ -160,7 +171,7 @@ fn main() -> rltk::BError {
     let mut rng = rltk::RandomNumberGenerator::new();
 
     for (i, room) in map.rooms.iter().skip(1).enumerate() {
-        let (x,y) = room.center();
+        let (x, y) = room.center();
 
         let roll = rng.roll_dice(1, 2);
         let glyph: rltk::FontCharType;
@@ -177,27 +188,28 @@ fn main() -> rltk::BError {
             }
         }
 
-        gs.ecs.create_entity()
-            .with(Position{ x, y })
-            .with(Renderable{
+        gs.ecs
+            .create_entity()
+            .with(Position { x, y })
+            .with(Renderable {
                 glyph,
                 fg: RGB::named(rltk::RED),
                 bg: RGB::named(rltk::BLACK),
             })
-            .with(Monster{})
-            .with(Name{
-                name: format!("{} #{}", &name, i)
+            .with(Monster {})
+            .with(Name {
+                name: format!("{} #{}", &name, i),
             })
-            .with(CombatStats{
+            .with(CombatStats {
                 max_hp: 16,
                 hp: 16,
                 defense: 1,
                 power: 4,
             })
-            .with(Viewshed{
-                visible_tiles : Vec::new(),
+            .with(Viewshed {
+                visible_tiles: Vec::new(),
                 range: 8,
-                dirty: true
+                dirty: true,
             })
             .build();
     }
@@ -206,7 +218,9 @@ fn main() -> rltk::BError {
     gs.ecs.insert(Point::new(player_x, player_y));
     gs.ecs.insert(player_entity);
     gs.ecs.insert(RunState::PreRun);
-    gs.ecs.insert(gamelog::GameLog{ entries: vec!["Welcome to sleepy crawler roguelike in rust".to_string()] });
+    gs.ecs.insert(gamelog::GameLog {
+        entries: vec!["Welcome to sleepy crawler roguelike in rust".to_string()],
+    });
 
     rltk::main_loop(context, gs)
 }

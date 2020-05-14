@@ -1,9 +1,15 @@
-use rltk::{ RGB, Rltk };
-use specs::prelude::*;
 use super::*;
+use rltk::{Rltk, RGB};
 
-pub fn draw_ui(ecs: &World, ctx : &mut Rltk) {
-    ctx.draw_box(0, 43, 79, 6, RGB::named(rltk::WHITE), RGB::named(rltk::BLACK));
+pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
+    ctx.draw_box(
+        0,
+        43,
+        79,
+        6,
+        RGB::named(rltk::WHITE),
+        RGB::named(rltk::BLACK),
+    );
 
     let combat_stats = ecs.read_storage::<CombatStats>();
     let players = ecs.read_storage::<Player>();
@@ -11,8 +17,22 @@ pub fn draw_ui(ecs: &World, ctx : &mut Rltk) {
     for (_player, stats) in (&players, &combat_stats).join() {
         let health = format!("HP: {} / {}", stats.hp, stats.max_hp);
 
-        ctx.print_color(12, 43, RGB::named(rltk::YELLOW), RGB::named(rltk::BLACK), &health);
-        ctx.draw_bar_horizontal(28, 43, 51, stats.hp, stats.max_hp, RGB::named(rltk::RED), RGB::named(rltk::BLACK));
+        ctx.print_color(
+            12,
+            43,
+            RGB::named(rltk::YELLOW),
+            RGB::named(rltk::BLACK),
+            &health,
+        );
+        ctx.draw_bar_horizontal(
+            28,
+            43,
+            51,
+            stats.hp,
+            stats.max_hp,
+            RGB::named(rltk::RED),
+            RGB::named(rltk::BLACK),
+        );
     }
 
     let log = ecs.fetch::<GameLog>();
@@ -34,7 +54,7 @@ fn draw_tooltips(ecs: &World, ctx: &mut Rltk) {
     let mouse_pos = ctx.mouse_pos();
 
     if mouse_pos.0 >= map.width || mouse_pos.1 >= map.height {
-        return
+        return;
     }
 
     let names = ecs.read_storage::<Name>();
@@ -70,23 +90,53 @@ fn draw_tooltips(ecs: &World, ctx: &mut Rltk) {
             ctx.print_color(left_x, y, RGB::named(rltk::RED), RGB::named(rltk::GREY), s);
             let padding = width - s.len() as i32;
             for i in 0..padding {
-                ctx.print_color(arrow_pos.x - i, y, RGB::named(rltk::WHITE), RGB::named(rltk::GREY), &" ".to_string());
+                ctx.print_color(
+                    arrow_pos.x - i,
+                    y,
+                    RGB::named(rltk::WHITE),
+                    RGB::named(rltk::GREY),
+                    &" ".to_string(),
+                );
             }
             y += 1;
         }
-        ctx.print_color(arrow_pos.x, arrow_pos.y, RGB::named(rltk::GREY), RGB::named(rltk::BLACK), &"►".to_string());
+        ctx.print_color(
+            arrow_pos.x,
+            arrow_pos.y,
+            RGB::named(rltk::GREY),
+            RGB::named(rltk::BLACK),
+            &"►".to_string(),
+        );
     } else {
         let arrow_pos = Point::new(mouse_pos.0 + 1, mouse_pos.1);
         let left_x = mouse_pos.0 + 2;
         let mut y = mouse_pos.1;
         for s in tooltip.iter() {
-            ctx.print_color(left_x + 1, y, RGB::named(rltk::RED), RGB::named(rltk::GREY), s);
+            ctx.print_color(
+                left_x + 1,
+                y,
+                RGB::named(rltk::RED),
+                RGB::named(rltk::GREY),
+                s,
+            );
             let padding = width - s.len() as i32;
             for i in 0..padding {
-                ctx.print_color(arrow_pos.x + i, y, RGB::named(rltk::WHITE), RGB::named(rltk::GREY), &" ".to_string());
+                ctx.print_color(
+                    arrow_pos.x + i,
+                    y,
+                    RGB::named(rltk::WHITE),
+                    RGB::named(rltk::GREY),
+                    &" ".to_string(),
+                );
             }
             y += 1;
         }
-        ctx.print_color(arrow_pos.x, arrow_pos.y, RGB::named(rltk::GREY), RGB::named(rltk::BLACK), &"◄".to_string());
+        ctx.print_color(
+            arrow_pos.x,
+            arrow_pos.y,
+            RGB::named(rltk::GREY),
+            RGB::named(rltk::BLACK),
+            &"◄".to_string(),
+        );
     }
 }
